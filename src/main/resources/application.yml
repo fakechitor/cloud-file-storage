@@ -1,3 +1,15 @@
 spring:
   application:
     name: cloud-file-storage
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cloud_file_storage
+    driver-class-name: org.postgresql.Driver
+    username: meari
+    password: 123456
+  jpa:
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+server:
+  servlet:
+    context-path: /api
