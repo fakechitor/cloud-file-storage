@@ -1,10 +1,9 @@
 package org.fakechitor.cloudfilestorage.controller
 
-import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.responses.ApiResponse
-import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.fakechitor.cloudfilestorage.docs.auth.AuthenticateUserDocs
+import org.fakechitor.cloudfilestorage.docs.auth.RegisterUserDocs
 import org.fakechitor.cloudfilestorage.dto.request.UserRequestDto
 import org.fakechitor.cloudfilestorage.service.AuthService
 import org.springframework.http.HttpStatus
@@ -19,13 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(
     private val authService: AuthService,
 ) {
-    @Operation(summary = "Authenticate user")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "200", description = "Authentication successful"),
-            ApiResponse(responseCode = "400", description = "Entered credentials are invalid"),
-        ],
-    )
+    @AuthenticateUserDocs
     @PostMapping("/login")
     fun authenticateUser(
         @RequestBody userRequestDto: UserRequestDto,
@@ -33,15 +26,10 @@ class AuthController(
         response: HttpServletResponse,
     ) = ResponseEntity.ok(authService.authenticate(userRequestDto, request, response))
 
-    @Operation(summary = "Register user")
-    @ApiResponses(
-        value = [
-            ApiResponse(responseCode = "201", description = "User created"),
-            ApiResponse(responseCode = "409", description = "User already exists"),
-        ],
-    )
+    @RegisterUserDocs
     @PostMapping("/register")
     fun registerUser(
         @RequestBody userRequestDto: UserRequestDto,
-    ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto))
+        request: HttpServletRequest,
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto, request))
 }
