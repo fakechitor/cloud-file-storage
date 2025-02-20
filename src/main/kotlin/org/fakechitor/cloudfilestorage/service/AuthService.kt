@@ -16,6 +16,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpServerErrorException
@@ -56,7 +57,10 @@ class AuthService(
         return UserResponseDto(login = userRequestDto.login)
     }
 
-    fun register(userRequestDto: UserRequestDto): UserResponseDto =
+    fun register(
+        userRequestDto: UserRequestDto,
+        request: HttpServletRequest,
+    ): UserResponseDto =
         try {
             userService
                 .save(
@@ -65,6 +69,11 @@ class AuthService(
                         .apply { password = bcryptPasswordEncoder.encode(password) },
                 ).also {
                     userRoleRepository.save(UserRole(it, roleService.findByName("ROLE_USER")))
+                    val authToken = UsernamePasswordAuthenticationToken(userRequestDto.login, userRequestDto.password)
+                    val authentication = authenticationManager.authenticate(authToken)
+                    val securityContext = SecurityContextHolder.getContext()
+                    securityContext.authentication = authentication
+                    request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext)
                 }.let { userMapper.convertToDto(it) }
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
