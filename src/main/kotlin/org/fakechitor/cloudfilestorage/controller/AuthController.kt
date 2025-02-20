@@ -5,8 +5,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.fakechitor.cloudfilestorage.dto.UserRequestDto
+import org.fakechitor.cloudfilestorage.dto.request.UserRequestDto
 import org.fakechitor.cloudfilestorage.service.AuthService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 class AuthController(
     private val authService: AuthService,
 ) {
@@ -42,5 +43,5 @@ class AuthController(
     @PostMapping("/register")
     fun registerUser(
         @RequestBody userRequestDto: UserRequestDto,
-    ) = ResponseEntity.ok(authService.register(userRequestDto))
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto))
 }

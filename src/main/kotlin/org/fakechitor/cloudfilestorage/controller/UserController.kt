@@ -1,12 +1,12 @@
 package org.fakechitor.cloudfilestorage.controller
 
-import org.fakechitor.cloudfilestorage.dto.UserResponseDto
+import org.fakechitor.cloudfilestorage.dto.response.UserResponseDto
 import org.fakechitor.cloudfilestorage.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("api/admin")
 class UserController(
     private val userService: UserService,
 ) {
