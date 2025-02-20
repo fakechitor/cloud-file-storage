@@ -11,7 +11,9 @@ import org.fakechitor.cloudfilestorage.repository.UserRoleRepository
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.security.authentication.AuthenticationManager
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.context.SecurityContextRepository
@@ -33,7 +35,7 @@ class AuthService(
         userRequestDto: UserRequestDto,
         request: HttpServletRequest,
         response: HttpServletResponse,
-    ) {
+    ): UserResponseDto {
         try {
             UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
                 val auth = authenticationManager.authenticate(it)
@@ -44,10 +46,14 @@ class AuthService(
                     securityContextRepository.saveContext(context, request, response)
                 }
             }
+        } catch (e: BadCredentialsException) {
+            SecurityContextHolder.clearContext()
+            throw BadCredentialsException("Failed to login with username: ${userRequestDto.login}", e)
         } catch (e: Exception) {
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
+        return UserResponseDto(login = userRequestDto.login)
     }
 
     fun register(userRequestDto: UserRequestDto): UserResponseDto =

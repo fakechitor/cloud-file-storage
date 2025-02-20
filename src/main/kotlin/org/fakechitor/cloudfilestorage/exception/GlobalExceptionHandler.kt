@@ -3,6 +3,7 @@ package org.fakechitor.cloudfilestorage.exception
 import org.fakechitor.cloudfilestorage.dto.response.ErrorResponseDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.HttpServerErrorException
@@ -10,10 +11,14 @@ import org.springframework.web.client.HttpServerErrorException
 @RestControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistsException::class)
-    fun handleUserAlreadyExistsException(e: UserAlreadyExistsException): ResponseEntity<ErrorResponseDto> =
+    fun handleUserAlreadyExistsException(e: UserAlreadyExistsException) =
         ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponseDto(message = e.message))
 
     @ExceptionHandler(HttpServerErrorException::class)
-    fun handleHttpServerErrorException(e: HttpServerErrorException): ResponseEntity<ErrorResponseDto> =
+    fun handleHttpServerErrorException(e: HttpServerErrorException) =
         ResponseEntity.status(e.statusCode).body(ErrorResponseDto(message = e.message))
+
+    @ExceptionHandler(BadCredentialsException::class)
+    fun handleBadCredentialsException(e: BadCredentialsException) =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponseDto(message = e.message))
 }
