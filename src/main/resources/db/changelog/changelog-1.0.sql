@@ -10,6 +10,6 @@ CREATE SEQUENCE user_id_seq
 CREATE TABLE users (
    id BIGINT PRIMARY KEY DEFAULT nextval('user_id_seq'),
    login VARCHAR(30) UNIQUE NOT NULL,
-   password VARCHAR(30) NOT NULL
-       CHECK (length(password) >= 3 AND length(password) <= 30)
+   password VARCHAR(255) NOT NULL
+       CHECK (length(password) >= 3 AND length(password) <= 255)
 );

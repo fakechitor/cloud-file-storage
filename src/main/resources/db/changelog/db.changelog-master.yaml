@@ -1,3 +1,16 @@
 databaseChangeLog:
   - include:
       file:  db/changelog/changelog-1.0.sql
+      created: 16:31_09.02.25
+      author: fakechitor
+      context: create user table
+  - include:
+      file: db/changelog/changelog-2.0.sql
+      created: 14:02_11.02.25
+      author: fakechitor
+      context: create tables for roles
+  - include:
+      file: db/changelog/changelog-2.1.sql
+      created: 14:16_11.02.25
+      author: fakechitor
+      context: insert USER and ADMIN roles in table
