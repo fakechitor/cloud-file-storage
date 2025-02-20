@@ -1,4 +1,4 @@
-package org.fakechitor.cloudfilestorage.security
+package org.fakechitor.cloudfilestorage.service
 
 import org.fakechitor.cloudfilestorage.repository.CustomRepository
 import org.fakechitor.cloudfilestorage.repository.UserRepository
