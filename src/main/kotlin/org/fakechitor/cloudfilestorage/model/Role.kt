@@ -12,8 +12,4 @@ class Role {
 
     @Column(name = "role")
     var name: String? = null
-
-    constructor(name: String) {
-        this.name = name
-    }
 }
