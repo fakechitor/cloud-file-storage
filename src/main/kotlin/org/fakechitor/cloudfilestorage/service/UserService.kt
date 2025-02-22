@@ -26,4 +26,6 @@ class UserService(
             onSuccess = { it },
             onFailure = { throw UserAlreadyExistsException("User already exists") },
         )
+
+    fun deleteAll() = userRepository.deleteAll()
 }
