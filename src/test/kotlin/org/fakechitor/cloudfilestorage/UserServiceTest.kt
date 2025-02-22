@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.mock.web.MockHttpServletRequest
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Propagation
@@ -63,7 +64,8 @@ class UserServiceTest {
                 password = "artem228",
             )
         val request = MockHttpServletRequest()
-        authService.register(userReq, request)
+        val response = MockHttpServletResponse()
+        authService.register(userReq, request, response)
         val users = userService.findAll()
         assertNotNull(users)
         assertEquals(1, users.size)
@@ -77,9 +79,10 @@ class UserServiceTest {
                 password = "artem228",
             )
         val request = MockHttpServletRequest()
-        authService.register(userReq, request)
+        val response = MockHttpServletResponse()
+        authService.register(userReq, request, response)
         assertThrows<UserAlreadyExistsException> {
-            authService.register(userReq, request)
+            authService.register(userReq, request, response)
         }
     }
 }

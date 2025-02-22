@@ -31,5 +31,6 @@ class AuthController(
     fun registerUser(
         @RequestBody userRequestDto: UserRequestDto,
         request: HttpServletRequest,
-    ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto, request))
+        response: HttpServletResponse,
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto, request, response))
 }

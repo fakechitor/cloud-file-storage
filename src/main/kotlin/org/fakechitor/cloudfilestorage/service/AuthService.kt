@@ -16,7 +16,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpServerErrorException
@@ -38,15 +37,7 @@ class AuthService(
         response: HttpServletResponse,
     ): UserResponseDto {
         try {
-            UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
-                val auth = authenticationManager.authenticate(it)
-                if (auth.isAuthenticated) {
-                    val context = securityContextHolder.createEmptyContext()
-                    context.authentication = auth
-                    securityContextHolder.context = context
-                    securityContextRepository.saveContext(context, request, response)
-                }
-            }
+            authenticateUser(userRequestDto, request, response)
         } catch (e: BadCredentialsException) {
             SecurityContextHolder.clearContext()
             throw BadCredentialsException("Failed to login with username: ${userRequestDto.login}", e)
@@ -60,6 +51,7 @@ class AuthService(
     fun register(
         userRequestDto: UserRequestDto,
         request: HttpServletRequest,
+        response: HttpServletResponse,
     ): UserResponseDto =
         try {
             userService
@@ -69,15 +61,27 @@ class AuthService(
                         .apply { password = bcryptPasswordEncoder.encode(password) },
                 ).also {
                     userRoleRepository.save(UserRole(it, roleService.findByName("ROLE_USER")))
-                    val authToken = UsernamePasswordAuthenticationToken(userRequestDto.login, userRequestDto.password)
-                    val authentication = authenticationManager.authenticate(authToken)
-                    val securityContext = SecurityContextHolder.getContext()
-                    securityContext.authentication = authentication
-                    request.getSession(true).setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext)
+                    authenticateUser(userRequestDto, request, response)
                 }.let { userMapper.convertToDto(it) }
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
         } catch (e: Exception) {
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
+
+    private fun authenticateUser(
+        userRequestDto: UserRequestDto,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
+        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
+            val auth = authenticationManager.authenticate(it)
+            if (auth.isAuthenticated) {
+                val context = securityContextHolder.createEmptyContext()
+                context.authentication = auth
+                securityContextHolder.context = context
+                securityContextRepository.saveContext(context, request, response)
+            }
+        }
+    }
 }
