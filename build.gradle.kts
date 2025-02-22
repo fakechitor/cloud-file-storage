@@ -32,6 +32,7 @@ dependencies {
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
     kapt("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3")
+    implementation("io.minio:minio:8.5.17")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
