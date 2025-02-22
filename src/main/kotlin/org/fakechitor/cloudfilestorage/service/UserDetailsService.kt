@@ -1,6 +1,5 @@
 package org.fakechitor.cloudfilestorage.service
 
-import org.fakechitor.cloudfilestorage.repository.CustomRepository
 import org.fakechitor.cloudfilestorage.repository.UserRepository
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service
 @Service
 class UserDetailsService(
     private val userRepository: UserRepository,
-    private val customRepository: CustomRepository,
 ) : UserDetailsService {
     override fun loadUserByUsername(username: String?): UserDetails {
         val user = username?.let { userRepository.findByLogin(it) } ?: throw UsernameNotFoundException("User not found")
@@ -25,7 +23,5 @@ class UserDetailsService(
     }
 
     private fun getGrantedAuthorities(username: String?): List<GrantedAuthority> =
-        customRepository.getAuthoritiesByName(username).map {
-            SimpleGrantedAuthority(it)
-        }
+        userRepository.findByLogin(username.toString())?.roles?.map { SimpleGrantedAuthority(it.name) } ?: emptyList()
 }
