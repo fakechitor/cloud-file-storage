@@ -12,6 +12,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Profile
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -26,6 +27,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers
+@Profile("test")
 class UserServiceTest {
     @Autowired
     private lateinit var authService: AuthService
@@ -60,8 +62,8 @@ class UserServiceTest {
     fun testUserSaving() {
         val userReq =
             UserRequestDto(
-                login = "artem",
-                password = "artem228",
+                login = "tima",
+                password = "tima1488",
             )
         val request = MockHttpServletRequest()
         val response = MockHttpServletResponse()
