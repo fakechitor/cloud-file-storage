@@ -14,7 +14,7 @@ class User {
     var login: String? = null
     var password: String? = null
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
         joinColumns = [JoinColumn(name = "id_user")],
@@ -22,4 +22,3 @@ class User {
     )
     var roles: MutableSet<Role> = mutableSetOf()
 }
-
