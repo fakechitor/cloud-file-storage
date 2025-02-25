@@ -1,20 +1,14 @@
 package org.fakechitor.cloudfilestorage.controller
 
-import org.fakechitor.cloudfilestorage.dto.response.UserResponseDto
 import org.fakechitor.cloudfilestorage.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("api/admin")
+@RequestMapping("api/user")
 class UserController(
     private val userService: UserService,
 ) {
-    @GetMapping("/users/{id}")
-    fun getUser(
-        @PathVariable id: String,
-    ): ResponseEntity<UserResponseDto> = ResponseEntity.ok(userService.findById(id.toLong()))
-
-    @GetMapping("/users")
-    fun getUsers(): ResponseEntity<List<UserResponseDto>> = ResponseEntity.ok(userService.findAll())
+    @GetMapping("/me")
+    fun getPersonalInfo() = ResponseEntity.ok(userService.getUsernameIfAuthorized())
 }
