@@ -37,15 +37,7 @@ class AuthService(
         response: HttpServletResponse,
     ): UserResponseDto {
         try {
-            UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
-                val auth = authenticationManager.authenticate(it)
-                if (auth.isAuthenticated) {
-                    val context = securityContextHolder.createEmptyContext()
-                    context.authentication = auth
-                    securityContextHolder.context = context
-                    securityContextRepository.saveContext(context, request, response)
-                }
-            }
+            authenticateUser(userRequestDto, request, response)
         } catch (e: BadCredentialsException) {
             SecurityContextHolder.clearContext()
             throw BadCredentialsException("Failed to login with username: ${userRequestDto.login}", e)
@@ -56,7 +48,11 @@ class AuthService(
         return UserResponseDto(login = userRequestDto.login)
     }
 
-    fun register(userRequestDto: UserRequestDto): UserResponseDto =
+    fun register(
+        userRequestDto: UserRequestDto,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): UserResponseDto =
         try {
             userService
                 .save(
@@ -65,10 +61,27 @@ class AuthService(
                         .apply { password = bcryptPasswordEncoder.encode(password) },
                 ).also {
                     userRoleRepository.save(UserRole(it, roleService.findByName("ROLE_USER")))
+                    authenticateUser(userRequestDto, request, response)
                 }.let { userMapper.convertToDto(it) }
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
         } catch (e: Exception) {
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
+
+    private fun authenticateUser(
+        userRequestDto: UserRequestDto,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
+        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
+            val auth = authenticationManager.authenticate(it)
+            if (auth.isAuthenticated) {
+                val context = securityContextHolder.createEmptyContext()
+                context.authentication = auth
+                securityContextHolder.context = context
+                securityContextRepository.saveContext(context, request, response)
+            }
+        }
+    }
 }

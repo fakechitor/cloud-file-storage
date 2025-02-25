@@ -6,6 +6,7 @@ import org.fakechitor.cloudfilestorage.exception.UserAlreadyExistsException
 import org.fakechitor.cloudfilestorage.model.User
 import org.fakechitor.cloudfilestorage.repository.UserRepository
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,10 +15,8 @@ class UserService(
     private val userRepository: UserRepository,
     private val userMapper: UserMapper,
 ) {
-    @Transactional(readOnly = true)
     fun findAll(): List<UserResponseDto> = userRepository.findAll().map { userMapper.convertToDto(it) }
 
-    @Transactional(readOnly = true)
     fun findById(id: Long): UserResponseDto? = userRepository.findByIdOrNull(id)?.let { userMapper.convertToDto(it) }
 
     @Transactional
@@ -26,4 +25,12 @@ class UserService(
             onSuccess = { it },
             onFailure = { throw UserAlreadyExistsException("User already exists") },
         )
+
+    @Transactional
+    fun deleteAll() = userRepository.deleteAll()
+
+    fun getUsernameIfAuthorized(): UserResponseDto {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return UserResponseDto(authentication?.takeIf { authentication.isAuthenticated }?.name)
+    }
 }

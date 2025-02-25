@@ -1,7 +1,8 @@
-package org.fakechitor.cloudfilestorage.security
+package org.fakechitor.cloudfilestorage.config.security
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.fakechitor.cloudfilestorage.service.UserDetailsService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -44,7 +45,7 @@ class SecurityConfig(
                 authorize(anyRequest, authenticated)
             }
             logout {
-                logoutUrl = "/api/auth/logout"
+                logoutUrl = "/api/auth/sign-out"
                 invalidateHttpSession = true
                 clearAuthentication = true
                 deleteCookies("JSESSIONID")

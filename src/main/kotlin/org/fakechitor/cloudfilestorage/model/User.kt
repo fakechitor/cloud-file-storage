@@ -14,12 +14,11 @@ class User {
     var login: String? = null
     var password: String? = null
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
-        joinColumns = [JoinColumn(name = "user_id")],
-        inverseJoinColumns = [JoinColumn(name = "role_id")],
+        joinColumns = [JoinColumn(name = "id_user")],
+        inverseJoinColumns = [JoinColumn(name = "id_role")],
     )
     var roles: MutableSet<Role> = mutableSetOf()
 }
-
