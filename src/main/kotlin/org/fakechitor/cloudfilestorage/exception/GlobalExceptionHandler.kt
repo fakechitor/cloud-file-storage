@@ -26,4 +26,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException) =
         ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("message" to e.fieldErrors.map { it.defaultMessage }))
+
+    @ExceptionHandler(PathNotExistsException::class)
+    fun handlePathNotExistsException(e: PathNotExistsException) =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDto(message = e.message))
 }
