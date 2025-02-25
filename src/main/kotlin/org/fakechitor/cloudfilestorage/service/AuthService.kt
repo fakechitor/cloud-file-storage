@@ -66,6 +66,7 @@ class AuthService(
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
         } catch (e: Exception) {
+            e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
