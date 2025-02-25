@@ -2,6 +2,7 @@ package org.fakechitor.cloudfilestorage.controller
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.Valid
 import org.fakechitor.cloudfilestorage.docs.auth.AuthenticateUserDocs
 import org.fakechitor.cloudfilestorage.docs.auth.RegisterUserDocs
 import org.fakechitor.cloudfilestorage.dto.request.UserRequestDto
@@ -21,7 +22,7 @@ class AuthController(
     @AuthenticateUserDocs
     @PostMapping("/sign-in")
     fun authenticateUser(
-        @RequestBody userRequestDto: UserRequestDto,
+        @Valid @RequestBody userRequestDto: UserRequestDto,
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) = ResponseEntity.ok(authService.authenticate(userRequestDto, request, response))
@@ -29,7 +30,7 @@ class AuthController(
     @RegisterUserDocs
     @PostMapping("/sign-up")
     fun registerUser(
-        @RequestBody userRequestDto: UserRequestDto,
+        @Valid @RequestBody userRequestDto: UserRequestDto,
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) = ResponseEntity.status(HttpStatus.CREATED).body(authService.register(userRequestDto, request, response))
