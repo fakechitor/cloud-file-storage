@@ -45,7 +45,7 @@ class SecurityConfig(
                 authorize(anyRequest, authenticated)
             }
             logout {
-                logoutUrl = "/api/auth/logout"
+                logoutUrl = "/api/auth/sign-out"
                 invalidateHttpSession = true
                 clearAuthentication = true
                 deleteCookies("JSESSIONID")

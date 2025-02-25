@@ -19,7 +19,7 @@ class AuthController(
     private val authService: AuthService,
 ) {
     @AuthenticateUserDocs
-    @PostMapping("/login")
+    @PostMapping("/sign-in")
     fun authenticateUser(
         @RequestBody userRequestDto: UserRequestDto,
         request: HttpServletRequest,
@@ -27,7 +27,7 @@ class AuthController(
     ) = ResponseEntity.ok(authService.authenticate(userRequestDto, request, response))
 
     @RegisterUserDocs
-    @PostMapping("/register")
+    @PostMapping("/sign-up")
     fun registerUser(
         @RequestBody userRequestDto: UserRequestDto,
         request: HttpServletRequest,
