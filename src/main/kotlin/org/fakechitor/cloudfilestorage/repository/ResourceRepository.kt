@@ -1,6 +1,7 @@
 package org.fakechitor.cloudfilestorage.repository
 
 import io.minio.MinioClient
+import io.minio.RemoveObjectArgs
 import io.minio.StatObjectArgs
 import io.minio.StatObjectResponse
 import io.minio.errors.ErrorResponseException
@@ -24,7 +25,23 @@ class ResourceRepository(
                     .build(),
             )
         } catch (e: ErrorResponseException) {
-            throw PathNotExistsException("Bucket with that path does not exist")
+            throw PathNotExistsException("Resource with that path does not exist")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
+    fun deleteObject(path: String) =
+        try {
+            minioClient.removeObject(
+                RemoveObjectArgs
+                    .builder()
+                    .bucket(HOME_BUCKET)
+                    .`object`(path)
+                    .build(),
+            )
+        } catch (e: ErrorResponseException) {
+            throw PathNotExistsException("Resource with that path does not exist")
         } catch (e: Exception) {
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)

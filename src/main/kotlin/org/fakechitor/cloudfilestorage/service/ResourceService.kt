@@ -18,6 +18,8 @@ class ResourceService(
             size = objectStats.size(),
         )
     }
+
+    fun deleteResource(path: String) = resourceRepository.deleteObject(path)
 }
 
 private fun StatObjectResponse.getObjectName(): String = this.`object`().split("/").last()
