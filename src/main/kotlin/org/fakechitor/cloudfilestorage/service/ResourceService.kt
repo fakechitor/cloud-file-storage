@@ -2,6 +2,7 @@ package org.fakechitor.cloudfilestorage.service
 
 import org.fakechitor.cloudfilestorage.dto.response.FileResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
+import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
 import org.fakechitor.cloudfilestorage.repository.ResourceRepository
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
@@ -32,7 +33,7 @@ class ResourceService(
 
     fun deleteResource(path: String) = resourceRepository.deleteObject(path)
 
-    fun downloadResource(path: String?): Resource {
+    fun downloadResource(path: String): Resource {
         val objectsList = resourceRepository.getListOfObjects(path)
         val resources =
             objectsList.map {
@@ -60,6 +61,26 @@ class ResourceService(
 
         val zipBytes = byteArrayOutputStream.toByteArray()
         return InputStreamResource(ByteArrayInputStream(zipBytes))
+    }
+
+    fun moveResource(
+        pathFrom: String,
+        pathTo: String,
+    ): FileResponseDto {
+        throwIfFileAlreadyExists(pathTo)
+        resourceRepository.copyObject(pathFrom, pathTo)
+        resourceRepository.deleteObject(pathFrom)
+        val file = resourceRepository.getObjectStats(pathTo)
+        return FileResponseDto(
+            path = file.`object`().getObjectPath(),
+            name = file.`object`().getObjectName(),
+            size = file.size(),
+        )
+    }
+
+    private fun throwIfFileAlreadyExists(pathTo: String) {
+        runCatching { resourceRepository.getObjectStats(pathTo) }
+            .onSuccess { throw FileAlreadyExistsException("File already exists in folder") }
     }
 }
 

@@ -46,7 +46,7 @@ class ResourceRepository(
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
-    fun getListOfObjects(path: String?): Iterable<Result<Item>> =
+    fun getListOfObjects(path: String): Iterable<Result<Item>> =
         minioClient.listObjects(
             ListObjectsArgs
                 .builder()
@@ -56,7 +56,7 @@ class ResourceRepository(
                 .build(),
         )
 
-    fun getObject(objectName: String?): InputStreamResource =
+    fun getObject(objectName: String): InputStreamResource =
         try {
             InputStreamResource(
                 minioClient.getObject(
@@ -73,4 +73,22 @@ class ResourceRepository(
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
+
+    fun copyObject(
+        pathFrom: String?,
+        pathTo: String?,
+    ): ObjectWriteResponse =
+        minioClient.copyObject(
+            CopyObjectArgs
+                .builder()
+                .bucket(HOME_BUCKET)
+                .`object`(pathTo)
+                .source(
+                    CopySource
+                        .builder()
+                        .bucket(HOME_BUCKET)
+                        .`object`(pathFrom)
+                        .build(),
+                ).build(),
+        )
 }

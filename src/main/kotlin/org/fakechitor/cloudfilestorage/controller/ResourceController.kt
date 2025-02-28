@@ -35,5 +35,11 @@ class ResourceController(
             .ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"files.zip\"")
             .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(resourceService.downloadResource(path.path))
+            .body(resourceService.downloadResource(path.path ?: ""))
+
+    @GetMapping("/move")
+    fun moveResource(
+        @RequestParam from: String,
+        @RequestParam to: String,
+    ) = ResponseEntity.ok().body(resourceService.moveResource(pathFrom = from, pathTo = to))
 }
