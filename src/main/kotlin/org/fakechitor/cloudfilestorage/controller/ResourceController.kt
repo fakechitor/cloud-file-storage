@@ -2,17 +2,17 @@ package org.fakechitor.cloudfilestorage.controller
 
 import jakarta.validation.Valid
 import org.fakechitor.cloudfilestorage.dto.request.PathRequestDto
-import org.fakechitor.cloudfilestorage.service.MinioService
+import org.fakechitor.cloudfilestorage.service.ResourceService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/resource")
 class ResourceController(
-    private val minioService: MinioService,
+    private val resourceService: ResourceService,
 ) {
-    @GetMapping("/{path}")
+    @GetMapping
     fun getResourceInfo(
-        @Valid @ModelAttribute pathDto: PathRequestDto,
-    ) = ResponseEntity.ok().body(minioService.getFiles(pathDto.path))
+        @Valid @ModelAttribute path: PathRequestDto,
+    ) = ResponseEntity.ok().body(resourceService.getResourceInfo(path.path ?: ""))
 }
