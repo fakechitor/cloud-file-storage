@@ -30,4 +30,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(PathNotExistsException::class)
     fun handlePathNotExistsException(e: PathNotExistsException) =
         ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDto(message = e.message))
+
+    @ExceptionHandler(FileAlreadyExistsException::class)
+    fun handleFileAlreadyExistsException(e: FileAlreadyExistsException) =
+        ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponseDto(message = e.message))
 }
