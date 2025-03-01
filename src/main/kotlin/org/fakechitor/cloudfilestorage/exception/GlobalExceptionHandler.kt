@@ -34,4 +34,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(FileAlreadyExistsException::class)
     fun handleFileAlreadyExistsException(e: FileAlreadyExistsException) =
         ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponseDto(message = e.message))
+
+    @ExceptionHandler(DirectoryNotExistsException::class)
+    fun handleDirectoryNotExistsException(e: DirectoryNotExistsException) =
+        ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDto(message = e.message))
 }
