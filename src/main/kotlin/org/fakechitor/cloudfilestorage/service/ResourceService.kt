@@ -4,6 +4,9 @@ import org.fakechitor.cloudfilestorage.dto.response.FileResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
 import org.fakechitor.cloudfilestorage.repository.ResourceRepository
+import org.fakechitor.cloudfilestorage.util.MinioUtil
+import org.fakechitor.cloudfilestorage.util.getObjectName
+import org.fakechitor.cloudfilestorage.util.getObjectPath
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
@@ -16,6 +19,7 @@ import java.util.zip.ZipOutputStream
 @Service
 class ResourceService(
     private val resourceRepository: ResourceRepository,
+    private val minioUtil: MinioUtil,
 ) {
     companion object {
         const val HOME_BUCKET = "user-files"
@@ -25,8 +29,8 @@ class ResourceService(
     fun getResourceInfo(path: String): MinioDataDto {
         val objectStats = resourceRepository.getObjectStats(path)
         return FileResponseDto(
-            path = objectStats.`object`().getObjectPath(),
-            name = objectStats.`object`().getObjectName(),
+            path = objectStats.`object`().getObjectPath(false),
+            name = objectStats.`object`().getObjectName(false),
             size = objectStats.size(),
         )
     }
@@ -72,8 +76,8 @@ class ResourceService(
         resourceRepository.deleteObject(pathFrom)
         val file = resourceRepository.getObjectStats(pathTo)
         return FileResponseDto(
-            path = file.`object`().getObjectPath(),
-            name = file.`object`().getObjectName(),
+            path = file.`object`().getObjectPath(false),
+            name = file.`object`().getObjectName(false),
             size = file.size(),
         )
     }
@@ -82,12 +86,9 @@ class ResourceService(
         runCatching { resourceRepository.getObjectStats(pathTo) }
             .onSuccess { throw FileAlreadyExistsException("File already exists in folder") }
     }
+
+    fun findResourceByName(query: String): List<MinioDataDto> =
+        resourceRepository.getListOfObjects("").filter { it.get().objectName().contains(query, ignoreCase = true) }.map {
+            minioUtil.handle(it.get())
+        }
 }
-
-private fun String.getObjectName(): String = this.split("/").last()
-
-private fun String.getObjectPath(): String =
-    this
-        .split("/")
-        .dropLast(1)
-        .joinToString("/")
