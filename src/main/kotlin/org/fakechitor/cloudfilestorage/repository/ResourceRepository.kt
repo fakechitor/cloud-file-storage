@@ -9,6 +9,7 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Repository
 import org.springframework.web.client.HttpServerErrorException
+import org.springframework.web.multipart.MultipartFile
 
 @Repository
 class ResourceRepository(
@@ -91,4 +92,26 @@ class ResourceRepository(
                         .build(),
                 ).build(),
         )
+
+    fun putResource(
+        path: String,
+        file: MultipartFile,
+    ): ObjectWriteResponse =
+        try {
+            minioClient.putObject(
+                PutObjectArgs
+                    .builder()
+                    .bucket(HOME_BUCKET)
+                    .`object`(path)
+                    .stream(
+                        file.inputStream,
+                        file.size,
+                        -1,
+                    ).contentType(file.contentType)
+                    .build(),
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
 }

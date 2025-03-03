@@ -10,6 +10,7 @@ import org.fakechitor.cloudfilestorage.util.getObjectPath
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.*
@@ -91,4 +92,11 @@ class ResourceService(
         resourceRepository.getListOfObjects("").filter { it.get().objectName().contains(query, ignoreCase = true) }.map {
             minioUtil.handle(it.get())
         }
+
+    fun uploadResource(
+        path: String,
+        file: MultipartFile,
+    ) {
+        resourceRepository.putResource(path, file)
+    }
 }

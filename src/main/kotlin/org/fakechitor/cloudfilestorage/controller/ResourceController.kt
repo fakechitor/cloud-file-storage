@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/resource")
@@ -20,6 +21,12 @@ class ResourceController(
     fun getResourceInfo(
         @Valid @ModelAttribute path: PathRequestDto,
     ) = ResponseEntity.ok().body(resourceService.getResourceInfo(path.path ?: ""))
+
+    @PostMapping
+    fun uploadResource(
+        @Valid @ModelAttribute path: PathRequestDto,
+        @RequestParam("file") file: MultipartFile,
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(resourceService.uploadResource(path = path.path ?: "", file = file))
 
     @DeleteMapping
     fun deleteResource(
