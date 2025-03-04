@@ -30,7 +30,7 @@ class ResourceService(
     fun getResourceInfo(path: String): MinioDataDto {
         val objectStats = resourceRepository.getObjectStats(path)
         return FileResponseDto(
-            path = objectStats.`object`().getObjectPath(false),
+            path = objectStats.`object`().getObjectPath(false) + "/",
             name = objectStats.`object`().getObjectName(false),
             size = objectStats.size(),
         )
@@ -77,7 +77,7 @@ class ResourceService(
         resourceRepository.deleteObject(pathFrom)
         val file = resourceRepository.getObjectStats(pathTo)
         return FileResponseDto(
-            path = file.`object`().getObjectPath(false),
+            path = file.`object`().getObjectPath(false) + "/",
             name = file.`object`().getObjectName(false),
             size = file.size(),
         )

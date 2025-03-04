@@ -12,13 +12,13 @@ class MinioUtil {
         when (item.isDir) {
             true -> {
                 DirectoryResponseDto(
-                    path = item.objectName().getObjectPath(true),
-                    name = item.objectName().getObjectName(true),
+                    path = item.objectName().getObjectPath(true) + "/",
+                    name = item.objectName().getObjectName(true) + "/",
                 )
             }
             false -> {
                 FileResponseDto(
-                    path = item.objectName().getObjectPath(false),
+                    path = item.objectName().getObjectPath(false) + "/",
                     name = item.objectName().getObjectName(false),
                     size = item.size(),
                 )
