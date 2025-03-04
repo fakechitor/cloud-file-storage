@@ -40,12 +40,12 @@ class AuthService(
             authenticateUser(userRequestDto, request, response)
         } catch (e: BadCredentialsException) {
             SecurityContextHolder.clearContext()
-            throw BadCredentialsException("Failed to login with username: ${userRequestDto.login}", e)
+            throw BadCredentialsException("Failed to login with username: ${userRequestDto.username}", e)
         } catch (e: Exception) {
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
-        return UserResponseDto(login = userRequestDto.login)
+        return UserResponseDto(username = userRequestDto.username)
     }
 
     fun register(
@@ -75,7 +75,7 @@ class AuthService(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
-        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
+        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.username, userRequestDto.password).also {
             val auth = authenticationManager.authenticate(it)
             if (auth.isAuthenticated) {
                 val context = securityContextHolder.createEmptyContext()
