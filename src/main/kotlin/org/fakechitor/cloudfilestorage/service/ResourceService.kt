@@ -44,16 +44,21 @@ class ResourceService(
             objectsList.map {
                 resourceRepository.getObject(it.get().objectName())
             }
-        val names: Queue<String> = LinkedList(objectsList.map { it.get().objectName() })
+        if (!path.endsWith("/")) return resources[0]
+        val names: Queue<String> = LinkedList(objectsList.map { getPathForZipFile(path = path, pathToFile = it.get().objectName()) })
         return makeZipFile(resources, names)
     }
+
+    private fun getPathForZipFile(
+        path: String,
+        pathToFile: String,
+    ): String = pathToFile.removePrefix(path.getObjectPath(true) + "/")
 
     private fun makeZipFile(
         resources: List<Resource>,
         names: Queue<String>,
     ): InputStreamResource {
         val byteArrayOutputStream = ByteArrayOutputStream()
-
         ZipOutputStream(byteArrayOutputStream).use { zipOut ->
             for (resource in resources) {
                 val inputStream = resource.inputStream
