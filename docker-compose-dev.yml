@@ -10,6 +10,8 @@ services:
       - POSTGRES_DB=cloud_file_storage
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
   minio:
     image: docker.io/bitnami/minio:2025
     ports:
@@ -23,6 +25,24 @@ services:
       - MINIO_ROOT_USER=meariuser
       - MINIO_ROOT_PASSWORD=12345678
       - MINIO_DEFAULT_BUCKETS=user-files
+  app:
+    image: cloud-file-storage-backend:0.0.1
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/cloud_file_storage
+      SPRING_DATASOURCE_USERNAME: meari
+      SPRING_DATASOURCE_PASSWORD: 123456
+    depends_on:
+      - db
+    networks:
+      - app-network
+  front:
+    image: cloud-front-test:latest
+    ports:
+      - '80:80'
+    networks:
+      - app-network
 volumes:
   pg_data:
   minio_data:

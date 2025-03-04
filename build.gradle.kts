@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jetbrains.kotlin.plugin.jpa") version "1.9.25"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.9.25"
+    id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 group = "org.fakechitor"
@@ -63,5 +64,14 @@ allOpen {
 kapt {
     arguments {
         arg("mapstruct.defaultComponentModel", "spring")
+    }
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:21-jre"
+    }
+    to {
+        image = "cloud-file-storage-backend:0.0.1"
     }
 }

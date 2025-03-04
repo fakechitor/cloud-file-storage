@@ -23,6 +23,8 @@ import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.web.servlet.config.annotation.CorsRegistry
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 @EnableMethodSecurity
@@ -33,6 +35,7 @@ class SecurityConfig(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http {
+            cors { }
             csrf { disable() }
             authenticationManager
             securityContext {
@@ -59,6 +62,18 @@ class SecurityConfig(
 
         return http.build()
     }
+
+    @Bean
+    fun corsConfigurer(): WebMvcConfigurer =
+        object : WebMvcConfigurer {
+            override fun addCorsMappings(registry: CorsRegistry) {
+                registry
+                    .addMapping("/api/**")
+                    .allowedOrigins("http://localhost:80")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                    .allowCredentials(true)
+            }
+        }
 
     @Bean
     fun authenticationProvider() =
