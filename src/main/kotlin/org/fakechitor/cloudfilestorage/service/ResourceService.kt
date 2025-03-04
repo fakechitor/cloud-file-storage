@@ -95,8 +95,20 @@ class ResourceService(
 
     fun uploadResource(
         path: String,
-        file: MultipartFile,
-    ) {
-        resourceRepository.putResource(path, file)
+        file: List<MultipartFile>,
+    ): List<MinioDataDto> {
+        val data: MutableList<MinioDataDto> = mutableListOf()
+        file.forEach {
+            resourceRepository.putResource(path + it.originalFilename, it).apply {
+                data.add(
+                    FileResponseDto(
+                        path = path,
+                        name = it.originalFilename ?: UNKNOWN_FILE_NAME,
+                        size = it.size,
+                    ),
+                )
+            }
+        }
+        return data
     }
 }
