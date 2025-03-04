@@ -31,7 +31,10 @@ class ResourceController(
     @DeleteMapping
     fun deleteResource(
         @Valid @ModelAttribute path: PathRequestDto,
-    ) = ResponseEntity.status(HttpStatus.NO_CONTENT).body(resourceService.deleteResource(path.path ?: ""))
+    ): ResponseEntity<Void> {
+        resourceService.deleteResource(path.path ?: "")
+        return ResponseEntity.noContent().build()
+    }
 
     @GetMapping("/download")
     fun downloadResource(
