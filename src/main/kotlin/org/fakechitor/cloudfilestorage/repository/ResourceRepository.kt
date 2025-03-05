@@ -5,6 +5,7 @@ import io.minio.errors.ErrorResponseException
 import io.minio.messages.Item
 import org.fakechitor.cloudfilestorage.exception.PathNotExistsException
 import org.fakechitor.cloudfilestorage.service.ResourceService.Companion.HOME_BUCKET
+import org.fakechitor.cloudfilestorage.service.UserService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Repository
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile
 @Repository
 class ResourceRepository(
     private val minioClient: MinioClient,
+    private val userService: UserService,
 ) {
     fun getObjectStats(path: String): StatObjectResponse =
         try {
@@ -21,7 +23,7 @@ class ResourceRepository(
                 StatObjectArgs
                     .builder()
                     .bucket(HOME_BUCKET)
-                    .`object`(path)
+                    .`object`(getParent() + path)
                     .build(),
             )
         } catch (e: ErrorResponseException) {
@@ -37,7 +39,7 @@ class ResourceRepository(
                 RemoveObjectArgs
                     .builder()
                     .bucket(HOME_BUCKET)
-                    .`object`(path)
+                    .`object`(getParent() + path)
                     .build(),
             )
         } catch (e: ErrorResponseException) {
@@ -52,7 +54,7 @@ class ResourceRepository(
             ListObjectsArgs
                 .builder()
                 .bucket(HOME_BUCKET)
-                .prefix(path)
+                .prefix(getParent() + path)
                 .recursive(true)
                 .build(),
         )
@@ -64,7 +66,7 @@ class ResourceRepository(
                     GetObjectArgs
                         .builder()
                         .bucket(HOME_BUCKET)
-                        .`object`(objectName)
+                        .`object`(getParent() + objectName)
                         .build(),
                 ),
             )
@@ -83,12 +85,12 @@ class ResourceRepository(
             CopyObjectArgs
                 .builder()
                 .bucket(HOME_BUCKET)
-                .`object`(pathTo)
+                .`object`(getParent() + pathTo)
                 .source(
                     CopySource
                         .builder()
                         .bucket(HOME_BUCKET)
-                        .`object`(pathFrom)
+                        .`object`(getParent() + pathFrom)
                         .build(),
                 ).build(),
         )
@@ -102,7 +104,7 @@ class ResourceRepository(
                 PutObjectArgs
                     .builder()
                     .bucket(HOME_BUCKET)
-                    .`object`(path)
+                    .`object`(getParent() + path)
                     .stream(
                         file.inputStream,
                         file.size,
@@ -114,4 +116,6 @@ class ResourceRepository(
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
+
+    private fun getParent() = userService.getParentFolderNameForUser()
 }
