@@ -17,7 +17,9 @@ class DirectoryService(
         directoryRepository
             .getObjectsInDirectory(path)
             .map { minioUtil.handle(it.get()) }
-            .takeIf {
+            .filter {
+                it.name.isNotEmpty()
+            }.takeIf {
                 it.isNotEmpty()
             } ?: throw DirectoryNotExistsException("Directory $path does not exist")
 
