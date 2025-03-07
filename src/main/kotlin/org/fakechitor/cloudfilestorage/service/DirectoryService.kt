@@ -4,7 +4,6 @@ import org.fakechitor.cloudfilestorage.dto.response.DirectoryResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.DirectoryNotExistsException
 import org.fakechitor.cloudfilestorage.repository.*
-import org.fakechitor.cloudfilestorage.util.getObjectPath
 import org.springframework.stereotype.Service
 
 @Service

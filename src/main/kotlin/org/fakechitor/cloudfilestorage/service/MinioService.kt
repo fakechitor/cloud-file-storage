@@ -10,6 +10,11 @@ import org.springframework.stereotype.Service
 class MinioService(
     private val userService: UserService,
 ) {
+    companion object {
+        const val HOME_BUCKET = "user-files"
+        const val UNKNOWN_FILE_NAME = "unknown"
+    }
+
     fun handleObjects(
         item: Item,
         path: String,
@@ -18,6 +23,23 @@ class MinioService(
             true -> handleDirectory(item, path)
 
             false -> handleFile(item, path)
+        }
+
+    fun handleObjects(item: Item): MinioDataDto =
+        when (item.isDir) {
+            true -> {
+                DirectoryResponseDto(
+                    path = item.objectName().removePrefix(userService.getParentFolderNameForUser()).getObjectPath(true) + "/",
+                    name = item.objectName().getObjectName(true) + "/",
+                )
+            }
+            false -> {
+                FileResponseDto(
+                    path = item.objectName().removePrefix(userService.getParentFolderNameForUser()).getObjectPath(false) + "/",
+                    name = item.objectName().getObjectName(false),
+                    size = item.size(),
+                )
+            }
         }
 
     fun handleDirectory(

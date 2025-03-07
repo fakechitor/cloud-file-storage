@@ -5,7 +5,7 @@ import io.minio.errors.ErrorResponseException
 import io.minio.messages.Item
 import org.fakechitor.cloudfilestorage.exception.DirectoryNotExistsException
 import org.fakechitor.cloudfilestorage.exception.PathNotExistsException
-import org.fakechitor.cloudfilestorage.service.ResourceService.Companion.HOME_BUCKET
+import org.fakechitor.cloudfilestorage.service.MinioService.Companion.HOME_BUCKET
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Repository
