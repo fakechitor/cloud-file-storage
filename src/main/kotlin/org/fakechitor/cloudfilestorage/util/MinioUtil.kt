@@ -16,8 +16,7 @@ class MinioUtil(
         when (item.isDir) {
             true -> {
                 DirectoryResponseDto(
-                    path =
-                        item.objectName().removePrefix(userService.getParentFolderNameForUser()).getObjectPath(true) + "/",
+                    path = item.objectName().removePrefix(userService.getParentFolderNameForUser()).getObjectPath(true) + "/",
                     name = item.objectName().getObjectName(true) + "/",
                 )
             }

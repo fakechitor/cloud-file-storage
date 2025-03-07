@@ -7,7 +7,6 @@ import org.fakechitor.cloudfilestorage.dto.request.UserRequestDto
 import org.fakechitor.cloudfilestorage.dto.response.UserResponseDto
 import org.fakechitor.cloudfilestorage.exception.UserAlreadyExistsException
 import org.fakechitor.cloudfilestorage.model.UserRole
-import org.fakechitor.cloudfilestorage.repository.DirectoryRepository
 import org.fakechitor.cloudfilestorage.repository.UserRoleRepository
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
@@ -31,7 +30,7 @@ class AuthService(
     private val securityContextHolder: SecurityContextHolderStrategy,
     private val userRoleRepository: UserRoleRepository,
     private val roleService: RoleService,
-    private val directoryRepository: DirectoryRepository,
+    private val directoryService: DirectoryService,
 ) {
     fun authenticate(
         userRequestDto: UserRequestDto,
@@ -64,7 +63,7 @@ class AuthService(
                 ).also {
                     userRoleRepository.save(UserRole(it, roleService.findByName("ROLE_USER")))
                     authenticateUser(userRequestDto, request, response)
-                    directoryRepository.putObject(userService.getParentFolderNameForUser(), ByteArray(0))
+                    directoryService.createDirectoryForNewUser()
                 }.let { userMapper.convertToDto(it) }
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
@@ -72,7 +71,6 @@ class AuthService(
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
-
 
     private fun authenticateUser(
         userRequestDto: UserRequestDto,
