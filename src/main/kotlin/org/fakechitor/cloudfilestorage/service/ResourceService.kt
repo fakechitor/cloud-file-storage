@@ -32,15 +32,21 @@ class ResourceService(
     fun deleteResource(path: String) = minioRepository.removeObject(minioService.getParentPath() + path)
 
     fun downloadResource(path: String): Resource {
-        val objectsList = minioRepository.getListObjects(path = minioService.getParentPath() + path, isRecursive = true)
-        val resources =
-            objectsList.map {
-                minioRepository.getObject(minioService.getParentPath() + it.get().objectName())
-            }
-        if (!path.endsWith("/")) return resources[0]
-        val names: Queue<String> = LinkedList(objectsList.map { getPathForZipFile(pathToFile = it.get().objectName()) })
-        return makeZipFile(resources, names)
+        if (path.endsWith("/")) {
+            val objectsList =
+                minioRepository.getListObjects(
+                    path = minioService.getParentPath() + getPathForDownload(path),
+                    isRecursive = true,
+                )
+            val resources = objectsList.map { minioRepository.getObject(it.get().objectName()) }
+            val names: Queue<String> = LinkedList(objectsList.map { getPathForZipFile(pathToFile = it.get().objectName()) })
+            return makeZipFile(resources, names)
+        } else {
+            return minioRepository.getObject(minioService.getParentPath() + path)
+        }
     }
+
+    private fun getPathForDownload(path: String) = path.substringBeforeLast("/")
 
     private fun getPathForZipFile(pathToFile: String): String = pathToFile.removePrefix(minioService.getParentPath())
 
