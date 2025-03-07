@@ -7,6 +7,7 @@ import org.fakechitor.cloudfilestorage.model.User
 import org.fakechitor.cloudfilestorage.repository.UserRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 class UserService(
     private val userRepository: UserRepository,
     private val userMapper: UserMapper,
+    private val securityContextHolder: SecurityContextHolderStrategy,
 ) {
     fun findAll(): List<UserResponseDto> = userRepository.findAll().map { userMapper.convertToDto(it) }
 
@@ -33,4 +35,8 @@ class UserService(
         val authentication = SecurityContextHolder.getContext().authentication
         return UserResponseDto(authentication?.takeIf { authentication.isAuthenticated }?.name)
     }
+
+    fun getParentFolderNameForUser() = "user-${getIdByName(securityContextHolder.context.authentication.name)}-files/"
+
+    private fun getIdByName(name: String) = userRepository.findByLogin(name)?.id
 }

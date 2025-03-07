@@ -62,7 +62,7 @@ class UserServiceTest {
     fun testUserSaving() {
         val userReq =
             UserRequestDto(
-                login = "tima",
+                username = "tima",
                 password = "tima1488",
             )
         val request = MockHttpServletRequest()
@@ -77,7 +77,7 @@ class UserServiceTest {
     fun testSavingOfExistingUserThrowException() {
         val userReq =
             UserRequestDto(
-                login = "artem",
+                username = "artem",
                 password = "artem228",
             )
         val request = MockHttpServletRequest()

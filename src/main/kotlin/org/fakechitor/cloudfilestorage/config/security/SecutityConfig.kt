@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
@@ -47,6 +48,10 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/admin/**", hasRole("ADMIN"))
                 authorize(anyRequest, authenticated)
             }
+            sessionManagement {
+                sessionCreationPolicy = SessionCreationPolicy.IF_REQUIRED
+            }
+
             logout {
                 logoutUrl = "/api/auth/sign-out"
                 invalidateHttpSession = true
