@@ -95,7 +95,7 @@ class ResourceService(
     fun findResourceByName(query: String): List<MinioDataDto> =
         minioRepository
             .getListObjects(
-                path = "",
+                path = minioService.getParentPath(),
                 isRecursive = true,
             ).filter { it.get().objectName().contains(query, ignoreCase = true) }
             .map { minioService.handleObjects(it.get()) }
