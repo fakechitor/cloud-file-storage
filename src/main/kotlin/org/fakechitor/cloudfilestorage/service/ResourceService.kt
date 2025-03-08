@@ -1,5 +1,6 @@
 package org.fakechitor.cloudfilestorage.service
 
+import org.fakechitor.cloudfilestorage.dto.response.DirectoryResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.FileResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
@@ -72,8 +73,44 @@ class ResourceService(
     fun moveResource(
         pathFrom: String,
         pathTo: String,
-    ): FileResponseDto {
+    ): MinioDataDto {
         throwIfFileAlreadyExists(pathTo)
+        return when (pathFrom.endsWith("/")) {
+            true -> moveDirectory(pathFrom = pathFrom, pathTo = pathTo)
+            false -> moveFile(pathFrom = pathFrom, pathTo = pathTo)
+        }
+    }
+
+    private fun moveDirectory(
+        pathFrom: String,
+        pathTo: String,
+    ): DirectoryResponseDto {
+        minioRepository.putObject(path = minioService.getParentPath() + pathTo, byteArray = ByteArray(0))
+        val objects = minioRepository.getListObjects(minioService.getParentPath() + pathFrom, true)
+        objects.forEach {
+            minioRepository.copyObject(
+                pathFrom = minioService.getParentPath() + pathFrom + getPathForObjectInFolder(it.get().objectName(), pathFrom),
+                pathTo = minioService.getParentPath() + pathTo + getPathForObjectInFolder(it.get().objectName(), pathFrom),
+            )
+        }
+
+        objects.forEach { minioRepository.removeObject(it.get().objectName()) }
+        val folder = minioRepository.getStatObject(minioService.getParentPath() + pathTo)
+        return DirectoryResponseDto(
+            path = folder.`object`().getObjectPath(true) + "/",
+            name = folder.`object`().getObjectName(true) + "/",
+        )
+    }
+
+    private fun getPathForObjectInFolder(
+        path: String,
+        pathFrom: String,
+    ) = path.removePrefix(minioService.getParentPath() + pathFrom).substringAfter("/")
+
+    private fun moveFile(
+        pathFrom: String,
+        pathTo: String,
+    ): FileResponseDto {
         minioRepository.copyObject(
             pathFrom = minioService.getParentPath() + pathFrom,
             pathTo = minioService.getParentPath() + pathTo,
