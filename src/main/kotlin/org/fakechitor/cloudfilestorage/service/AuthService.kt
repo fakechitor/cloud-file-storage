@@ -30,6 +30,7 @@ class AuthService(
     private val securityContextHolder: SecurityContextHolderStrategy,
     private val userRoleRepository: UserRoleRepository,
     private val roleService: RoleService,
+    private val directoryService: DirectoryService,
 ) {
     fun authenticate(
         userRequestDto: UserRequestDto,
@@ -40,12 +41,12 @@ class AuthService(
             authenticateUser(userRequestDto, request, response)
         } catch (e: BadCredentialsException) {
             SecurityContextHolder.clearContext()
-            throw BadCredentialsException("Failed to login with username: ${userRequestDto.login}", e)
+            throw BadCredentialsException("Failed to login with username: ${userRequestDto.username}", e)
         } catch (e: Exception) {
             e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
-        return UserResponseDto(login = userRequestDto.login)
+        return UserResponseDto(username = userRequestDto.username)
     }
 
     fun register(
@@ -62,10 +63,12 @@ class AuthService(
                 ).also {
                     userRoleRepository.save(UserRole(it, roleService.findByName("ROLE_USER")))
                     authenticateUser(userRequestDto, request, response)
+                    directoryService.createDirectoryForNewUser()
                 }.let { userMapper.convertToDto(it) }
         } catch (e: DataIntegrityViolationException) {
             throw UserAlreadyExistsException("User already exists")
         } catch (e: Exception) {
+            e.printStackTrace()
             throw HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR)
         }
 
@@ -74,7 +77,7 @@ class AuthService(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
-        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.login, userRequestDto.password).also {
+        UsernamePasswordAuthenticationToken.unauthenticated(userRequestDto.username, userRequestDto.password).also {
             val auth = authenticationManager.authenticate(it)
             if (auth.isAuthenticated) {
                 val context = securityContextHolder.createEmptyContext()

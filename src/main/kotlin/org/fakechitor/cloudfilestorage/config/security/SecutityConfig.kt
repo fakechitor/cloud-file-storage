@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.invoke
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
@@ -23,6 +24,9 @@ import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository
 import org.springframework.security.web.context.SecurityContextRepository
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 @EnableMethodSecurity
@@ -33,6 +37,9 @@ class SecurityConfig(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http {
+            cors {
+                configurationSource = corsConfigurationSource()
+            }
             csrf { disable() }
             authenticationManager
             securityContext {
@@ -44,6 +51,10 @@ class SecurityConfig(
                 authorize(HttpMethod.GET, "/api/admin/**", hasRole("ADMIN"))
                 authorize(anyRequest, authenticated)
             }
+            sessionManagement {
+                sessionCreationPolicy = SessionCreationPolicy.IF_REQUIRED
+            }
+
             logout {
                 logoutUrl = "/api/auth/sign-out"
                 invalidateHttpSession = true
@@ -58,6 +69,20 @@ class SecurityConfig(
         }
 
         return http.build()
+    }
+
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration =
+            CorsConfiguration().apply {
+                allowedOrigins = listOf("http://localhost:80")
+                allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                allowCredentials = true
+                allowedHeaders = listOf("*")
+            }
+        return UrlBasedCorsConfigurationSource().apply {
+            registerCorsConfiguration("/api/**", configuration)
+        }
     }
 
     @Bean

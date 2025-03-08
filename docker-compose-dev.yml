@@ -4,12 +4,12 @@ services:
     restart: always
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=meari
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=cloud_file_storage
+    env_file:
+      - .env
     volumes:
       - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
   minio:
     image: docker.io/bitnami/minio:2025
     ports:
@@ -19,14 +19,41 @@ services:
       - app-network
     volumes:
       - 'minio_data:/data'
-    environment:
-      - MINIO_ROOT_USER=meariuser
-      - MINIO_ROOT_PASSWORD=12345678
-      - MINIO_DEFAULT_BUCKETS=user-files
+    env_file:
+      - .env
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    restart: always
+  app:
+    image: cloud-file-storage-backend:latest
+    ports:
+      - '8080:8080'
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - minio
+      - redis
+    networks:
+      - app-network
+  front:
+    image: cloud-file-storage-frontend:latest
+    ports:
+      - '80:80'
+    networks:
+      - app-network
 volumes:
   pg_data:
   minio_data:
     driver: local
+  redis_data:
 networks:
   app-network:
     driver: bridge

@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("org.jetbrains.kotlin.plugin.jpa") version "1.9.25"
     id("org.jetbrains.kotlin.plugin.allopen") version "1.9.25"
+    id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 group = "org.fakechitor"
@@ -26,6 +27,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.session:spring-session-data-redis")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.liquibase:liquibase-core")
@@ -63,5 +66,14 @@ allOpen {
 kapt {
     arguments {
         arg("mapstruct.defaultComponentModel", "spring")
+    }
+}
+
+jib {
+    from {
+        image = "eclipse-temurin:21-jre"
+    }
+    to {
+        image = "cloud-file-storage-backend:latest"
     }
 }

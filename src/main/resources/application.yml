@@ -2,15 +2,22 @@ spring:
   application:
     name: cloud-file-storage
   datasource:
-    url: jdbc:postgresql://localhost:5432/cloud_file_storage
+    url: ${POSTGRES_URL}
     driver-class-name: org.postgresql.Driver
-    username: meari
-    password: 123456
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     open-in-view: false
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 minio:
-  endpoint: http://localhost:9000
-  access-key: meariuser
-  secret-key: 12345678
+  endpoint: ${MINIO_URL}
+  access-key: ${MINIO_ROOT_USER}
+  secret-key: ${MINIO_ROOT_PASSWORD}
+logging:
+  level:
+    org.springframework.security: TRACE
