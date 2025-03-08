@@ -4,7 +4,9 @@ import org.fakechitor.cloudfilestorage.dto.response.DirectoryResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.FileResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
+import org.fakechitor.cloudfilestorage.exception.FileSizeLimitExceededException
 import org.fakechitor.cloudfilestorage.repository.MinioRepository
+import org.fakechitor.cloudfilestorage.service.MinioService.Companion.MAX_FILE_SIZE
 import org.fakechitor.cloudfilestorage.service.MinioService.Companion.UNKNOWN_FILE_NAME
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
@@ -141,6 +143,7 @@ class ResourceService(
         path: String,
         file: List<MultipartFile>,
     ): List<MinioDataDto> {
+        throwIfFileSizeIsBig(file)
         val data: MutableList<MinioDataDto> = mutableListOf()
         file.forEach {
             minioRepository.putObject(minioService.getParentPath() + path + it.originalFilename, it).apply {
@@ -154,5 +157,11 @@ class ResourceService(
             }
         }
         return data
+    }
+
+    private fun throwIfFileSizeIsBig(file: List<MultipartFile>) {
+        var sum = 0
+        file.forEach { sum += it.size.toInt() }
+        if (sum > MAX_FILE_SIZE) throw FileSizeLimitExceededException("Upload files size should be lower than 20 mb")
     }
 }
