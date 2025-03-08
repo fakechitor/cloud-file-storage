@@ -26,7 +26,7 @@ class ResourceController(
     fun uploadResource(
         @Valid @ModelAttribute path: PathRequestDto,
         @RequestParam("object") file: List<MultipartFile>,
-    ) = ResponseEntity.status(HttpStatus.CREATED).body(resourceService.uploadResource(path = path.path ?: "", file = file))
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(resourceService.uploadResource(path = path.path ?: "", files = file))
 
     @DeleteMapping
     fun deleteResource(

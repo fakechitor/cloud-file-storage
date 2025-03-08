@@ -141,11 +141,12 @@ class ResourceService(
 
     fun uploadResource(
         path: String,
-        file: List<MultipartFile>,
+        files: List<MultipartFile>,
     ): List<MinioDataDto> {
-        throwIfFileSizeIsBig(file)
+        throwIfFileAlreadyExists(path, files)
+        throwIfFileSizeIsBig(files)
         val data: MutableList<MinioDataDto> = mutableListOf()
-        file.forEach {
+        files.forEach {
             minioRepository.putObject(minioService.getParentPath() + path + it.originalFilename, it).apply {
                 data.add(
                     FileResponseDto(
@@ -164,4 +165,11 @@ class ResourceService(
         file.forEach { sum += it.size.toInt() }
         if (sum > MAX_FILE_SIZE) throw FileSizeLimitExceededException("Upload files size should be lower than 20 mb")
     }
+
+    private fun throwIfFileAlreadyExists(
+        pathTo: String,
+        files: List<MultipartFile>,
+    ) = runCatching {
+        files.forEach { minioRepository.getStatObject(minioService.getParentPath() + pathTo + it.originalFilename) }
+    }.onFailure { throw FileAlreadyExistsException("File with that name already exists in folder") }
 }
