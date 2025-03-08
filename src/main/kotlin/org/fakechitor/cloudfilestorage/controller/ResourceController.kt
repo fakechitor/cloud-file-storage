@@ -49,9 +49,9 @@ class ResourceController(
 
     @GetMapping("/move")
     fun moveResource(
-        @RequestParam from: String,
-        @RequestParam to: String,
-    ) = ResponseEntity.ok().body(resourceService.moveResource(pathFrom = from, pathTo = to))
+        @Valid @RequestParam from: PathRequestDto,
+        @Valid @RequestParam to: PathRequestDto,
+    ) = ResponseEntity.ok().body(resourceService.moveResource(pathFrom = from.path ?: "", pathTo = to.path ?: ""))
 
     @GetMapping("/search")
     fun searchResource(
