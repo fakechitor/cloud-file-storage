@@ -86,15 +86,15 @@ class ResourceService(
         pathTo: String,
     ): DirectoryResponseDto {
         minioRepository.putObject(path = minioService.getParentPath() + pathTo, byteArray = ByteArray(0))
-        val objects = minioRepository.getListObjects(minioService.getParentPath() + pathFrom, true)
-        objects.forEach {
-            minioRepository.copyObject(
-                pathFrom = minioService.getParentPath() + pathFrom + getPathForObjectInFolder(it.get().objectName(), pathFrom),
-                pathTo = minioService.getParentPath() + pathTo + getPathForObjectInFolder(it.get().objectName(), pathFrom),
-            )
+        minioRepository.getListObjects(minioService.getParentPath() + pathFrom, true).let {
+            it.forEach {
+                minioRepository.copyObject(
+                    pathFrom = minioService.getParentPath() + pathFrom + getPathForObjectInFolder(it.get().objectName(), pathFrom),
+                    pathTo = minioService.getParentPath() + pathTo + getPathForObjectInFolder(it.get().objectName(), pathFrom),
+                )
+            }
+            it.forEach { minioRepository.removeObject(it.get().objectName()) }
         }
-
-        objects.forEach { minioRepository.removeObject(it.get().objectName()) }
         val folder = minioRepository.getStatObject(minioService.getParentPath() + pathTo)
         return DirectoryResponseDto(
             path = folder.`object`().getObjectPath(true) + "/",
