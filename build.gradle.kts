@@ -74,6 +74,6 @@ jib {
         image = "eclipse-temurin:21-jre"
     }
     to {
-        image = "cloud-file-storage-backend:0.0.1"
+        image = "cloud-file-storage-backend:latest"
     }
 }
