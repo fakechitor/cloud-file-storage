@@ -18,7 +18,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.context.SecurityContextHolderStrategy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler
@@ -35,7 +34,10 @@ class SecurityConfig(
     private val userDetailsService: UserDetailsService,
 ) {
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(
+        http: HttpSecurity,
+        customEntryPoint: CustomEntryPoint,
+    ): SecurityFilterChain {
         http {
             cors {
                 configurationSource = corsConfigurationSource()
@@ -63,7 +65,7 @@ class SecurityConfig(
                 logoutSuccessHandler = logoutSuccessHandler()
             }
             exceptionHandling {
-                authenticationEntryPoint = authenticationEntryPoint()
+                authenticationEntryPoint = customEntryPoint
                 accessDeniedHandler = accessDeniedHandler()
             }
         }
@@ -104,11 +106,11 @@ class SecurityConfig(
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder()
 
-    @Bean
-    fun authenticationEntryPoint(): AuthenticationEntryPoint =
-        AuthenticationEntryPoint { request, response, exception ->
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-        }
+//    @Bean
+//    fun authenticationEntryPoint(): AuthenticationEntryPoint =
+//        AuthenticationEntryPoint { request, response, exception ->
+//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "User is unauthorized")
+//        }
 
     @Bean
     fun accessDeniedHandler(): AccessDeniedHandler =
