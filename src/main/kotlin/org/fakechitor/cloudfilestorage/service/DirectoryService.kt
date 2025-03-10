@@ -3,6 +3,7 @@ package org.fakechitor.cloudfilestorage.service
 import org.fakechitor.cloudfilestorage.dto.response.DirectoryResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.DirectoryNotExistsException
+import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
 import org.fakechitor.cloudfilestorage.repository.*
 import org.springframework.stereotype.Service
 
@@ -21,6 +22,7 @@ class DirectoryService(
             }.filter { it.name.isNotEmpty() }
 
     fun createEmptyDirectory(path: String): DirectoryResponseDto {
+        throwIfFolderAlreadyExists(path)
         val fullPath = minioService.getParentPath() + path
         throwIfParentFolderNotExists(fullPath)
         val dir = minioRepository.putObject(path = fullPath, byteArray = ByteArray(0)).`object`()
@@ -28,6 +30,14 @@ class DirectoryService(
             path = dir.getObjectPath(true),
             name = dir.getObjectName(true),
         )
+    }
+
+    private fun throwIfFolderAlreadyExists(path: String) {
+        runCatching {
+            minioRepository.getStatObject(minioService.getParentPath() + path)
+        }.onSuccess {
+            throw FileAlreadyExistsException("Folder with that name already exists")
+        }
     }
 
     fun createDirectoryForNewUser() = minioRepository.putObject(path = userService.getParentFolderNameForUser(), byteArray = ByteArray(0))
