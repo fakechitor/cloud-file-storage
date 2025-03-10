@@ -27,7 +27,7 @@ class DirectoryService(
         throwIfParentFolderNotExists(fullPath)
         val dir = minioRepository.putObject(path = fullPath, byteArray = ByteArray(0)).`object`()
         return DirectoryResponseDto(
-            path = dir.getObjectPath(true),
+            path = (dir.getObjectPath(true) + "/").removePrefix(minioService.getParentPath()),
             name = dir.getObjectName(true),
         )
     }
