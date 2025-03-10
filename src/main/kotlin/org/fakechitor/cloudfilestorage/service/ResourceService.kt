@@ -37,7 +37,6 @@ class ResourceService(
             minioRepository
                 .getListObjects(minioService.getParentPath() + path, true)
                 .forEach { minioRepository.removeObject(it.get().objectName()) }
-            println()
         } else {
             minioRepository.removeObject(minioService.getParentPath() + path)
         }
@@ -53,9 +52,8 @@ class ResourceService(
             val resources = objectsList.map { minioRepository.getObject(it.get().objectName()) }
             val names: Queue<String> = LinkedList(objectsList.map { getPathForZipFile(pathToFile = it.get().objectName()) })
             return makeZipFile(resources, names)
-        } else {
-            return minioRepository.getObject(minioService.getParentPath() + path)
         }
+        return minioRepository.getObject(minioService.getParentPath() + path)
     }
 
     private fun getPathForDownload(path: String) = path.substringBeforeLast("/")
