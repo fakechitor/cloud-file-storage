@@ -32,7 +32,16 @@ class ResourceService(
         )
     }
 
-    fun deleteResource(path: String) = minioRepository.removeObject(minioService.getParentPath() + path)
+    fun deleteResource(path: String) {
+        if (path.endsWith("/")) {
+            minioRepository
+                .getListObjects(minioService.getParentPath() + path, true)
+                .forEach { minioRepository.removeObject(it.get().objectName()) }
+            println()
+        } else {
+            minioRepository.removeObject(minioService.getParentPath() + path)
+        }
+    }
 
     fun downloadResource(path: String): Resource {
         if (path.endsWith("/")) {
