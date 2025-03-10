@@ -38,4 +38,8 @@ class GlobalExceptionHandler {
     @ExceptionHandler(DirectoryNotExistsException::class)
     fun handleDirectoryNotExistsException(e: DirectoryNotExistsException) =
         ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorResponseDto(message = e.message))
+
+    @ExceptionHandler(FileSizeLimitExceededException::class)
+    fun handleFileSizeLimitExceededException(e: FileSizeLimitExceededException) =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponseDto(message = e.message))
 }

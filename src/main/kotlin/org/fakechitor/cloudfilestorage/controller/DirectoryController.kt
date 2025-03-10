@@ -1,5 +1,8 @@
 package org.fakechitor.cloudfilestorage.controller
 
+import jakarta.validation.Valid
+import org.fakechitor.cloudfilestorage.docs.minio.directory.CreateEmptyDirectoryDocs
+import org.fakechitor.cloudfilestorage.docs.minio.directory.GetDirectoryInfoDocs
 import org.fakechitor.cloudfilestorage.dto.request.PathRequestDto
 import org.fakechitor.cloudfilestorage.service.DirectoryService
 import org.springframework.http.HttpStatus
@@ -16,12 +19,14 @@ class DirectoryController(
     private val directoryService: DirectoryService,
 ) {
     @GetMapping
+    @GetDirectoryInfoDocs
     fun directoryInfo(
-        @ModelAttribute path: PathRequestDto,
+        @Valid @ModelAttribute path: PathRequestDto,
     ) = ResponseEntity.ok().body(directoryService.getObjectsInDirectory(path.path ?: ""))
 
     @PostMapping
+    @CreateEmptyDirectoryDocs
     fun createDirectory(
-        @ModelAttribute path: PathRequestDto,
+        @Valid @ModelAttribute path: PathRequestDto,
     ) = ResponseEntity.status(HttpStatus.CREATED).body(directoryService.createEmptyDirectory(path.path ?: ""))
 }

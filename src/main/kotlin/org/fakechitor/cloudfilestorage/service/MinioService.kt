@@ -13,6 +13,7 @@ class MinioService(
     companion object {
         const val HOME_BUCKET = "user-files"
         const val UNKNOWN_FILE_NAME = "unknown"
+        const val MAX_FILE_SIZE = 20971520
     }
 
     fun handleObjects(

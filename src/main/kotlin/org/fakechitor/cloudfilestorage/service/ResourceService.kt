@@ -4,7 +4,9 @@ import org.fakechitor.cloudfilestorage.dto.response.DirectoryResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.FileResponseDto
 import org.fakechitor.cloudfilestorage.dto.response.MinioDataDto
 import org.fakechitor.cloudfilestorage.exception.FileAlreadyExistsException
+import org.fakechitor.cloudfilestorage.exception.FileSizeLimitExceededException
 import org.fakechitor.cloudfilestorage.repository.MinioRepository
+import org.fakechitor.cloudfilestorage.service.MinioService.Companion.MAX_FILE_SIZE
 import org.fakechitor.cloudfilestorage.service.MinioService.Companion.UNKNOWN_FILE_NAME
 import org.springframework.core.io.InputStreamResource
 import org.springframework.core.io.Resource
@@ -30,7 +32,15 @@ class ResourceService(
         )
     }
 
-    fun deleteResource(path: String) = minioRepository.removeObject(minioService.getParentPath() + path)
+    fun deleteResource(path: String) {
+        if (path.endsWith("/")) {
+            minioRepository
+                .getListObjects(minioService.getParentPath() + path, true)
+                .forEach { minioRepository.removeObject(it.get().objectName()) }
+        } else {
+            minioRepository.removeObject(minioService.getParentPath() + path)
+        }
+    }
 
     fun downloadResource(path: String): Resource {
         if (path.endsWith("/")) {
@@ -42,9 +52,8 @@ class ResourceService(
             val resources = objectsList.map { minioRepository.getObject(it.get().objectName()) }
             val names: Queue<String> = LinkedList(objectsList.map { getPathForZipFile(pathToFile = it.get().objectName()) })
             return makeZipFile(resources, names)
-        } else {
-            return minioRepository.getObject(minioService.getParentPath() + path)
         }
+        return minioRepository.getObject(minioService.getParentPath() + path)
     }
 
     private fun getPathForDownload(path: String) = path.substringBeforeLast("/")
@@ -139,10 +148,12 @@ class ResourceService(
 
     fun uploadResource(
         path: String,
-        file: List<MultipartFile>,
+        files: List<MultipartFile>,
     ): List<MinioDataDto> {
+        throwIfFileAlreadyExists(path, files)
+        throwIfFileSizeIsBig(files)
         val data: MutableList<MinioDataDto> = mutableListOf()
-        file.forEach {
+        files.forEach {
             minioRepository.putObject(minioService.getParentPath() + path + it.originalFilename, it).apply {
                 data.add(
                     FileResponseDto(
@@ -155,4 +166,17 @@ class ResourceService(
         }
         return data
     }
+
+    private fun throwIfFileSizeIsBig(file: List<MultipartFile>) {
+        var sum = 0
+        file.forEach { sum += it.size.toInt() }
+        if (sum > MAX_FILE_SIZE) throw FileSizeLimitExceededException("Upload files size should be lower than 20 mb")
+    }
+
+    private fun throwIfFileAlreadyExists(
+        pathTo: String,
+        files: List<MultipartFile>,
+    ) = runCatching {
+        files.forEach { minioRepository.getStatObject(minioService.getParentPath() + pathTo + it.originalFilename) }
+    }.onSuccess { throw FileAlreadyExistsException("File with that name already exists in folder") }
 }

@@ -2,6 +2,7 @@ package org.fakechitor.cloudfilestorage.controller
 
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
+import org.fakechitor.cloudfilestorage.docs.minio.resource.*
 import org.fakechitor.cloudfilestorage.dto.request.PathRequestDto
 import org.fakechitor.cloudfilestorage.service.ResourceService
 import org.springframework.core.io.Resource
@@ -18,17 +19,20 @@ class ResourceController(
     private val resourceService: ResourceService,
 ) {
     @GetMapping
+    @GetResourceInfoDocs
     fun getResourceInfo(
         @Valid @ModelAttribute path: PathRequestDto,
     ) = ResponseEntity.ok().body(resourceService.getResourceInfo(path.path ?: ""))
 
     @PostMapping
+    @UploadResourceDocs
     fun uploadResource(
         @Valid @ModelAttribute path: PathRequestDto,
         @RequestParam("object") file: List<MultipartFile>,
-    ) = ResponseEntity.status(HttpStatus.CREATED).body(resourceService.uploadResource(path = path.path ?: "", file = file))
+    ) = ResponseEntity.status(HttpStatus.CREATED).body(resourceService.uploadResource(path = path.path ?: "", files = file))
 
     @DeleteMapping
+    @DeleteResourceDocs
     fun deleteResource(
         @Valid @ModelAttribute path: PathRequestDto,
     ): ResponseEntity<Void> {
@@ -37,6 +41,7 @@ class ResourceController(
     }
 
     @GetMapping("/download")
+    @DownloadResourceDocs
     fun downloadResource(
         @Valid @ModelAttribute path: PathRequestDto,
         response: HttpServletResponse,
@@ -48,12 +53,14 @@ class ResourceController(
             .body(resourceService.downloadResource(path.path ?: ""))
 
     @GetMapping("/move")
+    @MoveResourceDocs
     fun moveResource(
-        @RequestParam from: String,
-        @RequestParam to: String,
-    ) = ResponseEntity.ok().body(resourceService.moveResource(pathFrom = from, pathTo = to))
+        @Valid @RequestParam from: PathRequestDto,
+        @Valid @RequestParam to: PathRequestDto,
+    ) = ResponseEntity.ok().body(resourceService.moveResource(pathFrom = from.path ?: "", pathTo = to.path ?: ""))
 
     @GetMapping("/search")
+    @SearchResourceDocs
     fun searchResource(
         @Valid @RequestParam query: PathRequestDto,
     ) = ResponseEntity.ok().body(resourceService.findResourceByName(query.path ?: ""))
