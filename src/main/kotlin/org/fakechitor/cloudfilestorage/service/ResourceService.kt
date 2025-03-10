@@ -171,5 +171,5 @@ class ResourceService(
         files: List<MultipartFile>,
     ) = runCatching {
         files.forEach { minioRepository.getStatObject(minioService.getParentPath() + pathTo + it.originalFilename) }
-    }.onFailure { throw FileAlreadyExistsException("File with that name already exists in folder") }
+    }.onSuccess { throw FileAlreadyExistsException("File with that name already exists in folder") }
 }
